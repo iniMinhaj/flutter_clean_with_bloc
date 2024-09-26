@@ -110,7 +110,6 @@ class ApiInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print("error = $err");
     // Handle no internet connection
     if (err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.unknown) {
@@ -119,12 +118,11 @@ class ApiInterceptor extends Interceptor {
     // Handle API-specific error responses
     else if (err.type == DioExceptionType.badResponse) {
       int? statusCode = err.response?.statusCode;
-      print("status code: $statusCode");
 
       switch (statusCode) {
         case 400:
-          print("400 error = ${err.response}");
-          _handleValidationErrors(err.response?.data);
+          _showErrorDialog(err.response?.data['errors']['validation']);
+
           break;
         case 401:
           _showErrorDialog("Unauthorized. Please log in.");
@@ -132,12 +130,14 @@ class ApiInterceptor extends Interceptor {
         case 404:
           _showErrorDialog("Resource not found.");
           break;
+        case 422:
+          _handleValidationErrors(err.response?.data['errors']);
+          break;
         case 500:
           _showErrorDialog("Server error. Please try again later.");
           break;
         default:
           String? apiErrorMessage = err.response?.data['error'];
-          print("Defaul error = $apiErrorMessage");
           _showErrorDialog(apiErrorMessage != null && apiErrorMessage.isNotEmpty
               ? apiErrorMessage
               : "An unknown error occurred.");
@@ -163,11 +163,10 @@ class ApiInterceptor extends Interceptor {
         fontSize: 16.0);
   }
 
-  // Handle 400 Validation Errors
+  // Handle 422 Validation Errors
   void _handleValidationErrors(Map<String, dynamic>? errorData) {
-    print("validation error = $errorData");
-    if (errorData != null && errorData['errors'] != null) {
-      Map<String, dynamic> errors = errorData['errors'];
+    if (errorData != null) {
+      Map<String, dynamic> errors = errorData;
       String errorMessage = '';
       errors.forEach((field, messages) {
         errorMessage += '${messages.join(', ')}\n';

@@ -27,11 +27,6 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(state.user.email ??
                     "no user found"))); // Adjust route as needed
-          } else if (state is LoginFailure) {
-            // Show an error message if login fails
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage)),
-            );
           }
         },
         child: Padding(
