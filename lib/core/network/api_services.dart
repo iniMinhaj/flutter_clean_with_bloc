@@ -14,7 +14,7 @@ class ApiService {
   }
 
   // Example GET request method
-  Future<Response> get(String endpoint, {bool requiresToken = false}) async {
+  Future<Response> get({required String endpoint, bool requiresToken = false}) async {
     return await _dio.get(endpoint,
         options: Options(extra: {'requiresToken': requiresToken}));
   }

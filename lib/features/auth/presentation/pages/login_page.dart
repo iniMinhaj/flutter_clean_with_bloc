@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_clean_with_bloc/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_clean_with_bloc/features/product/presentation/pages/product_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +27,11 @@ class _LoginPageState extends State<LoginPage> {
             // Handle successful login, navigate to the next screen
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(state.user.email ??
-                    "no user found"))); // Adjust route as needed
+                    "no user found"))); 
+                    
+            // Adjust route as needed
+
+            Navigator.of(context).push(MaterialPageRoute(builder: (_)=> const ProductScreen()));
           }
         },
         child: Padding(

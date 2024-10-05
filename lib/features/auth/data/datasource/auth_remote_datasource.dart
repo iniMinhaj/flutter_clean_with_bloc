@@ -18,8 +18,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<UserModel> login(
       {required String email, required String password}) async {
     print("login is started");
-    print("email = ${email}");
-    print("password = ${password}");
+    print("email = $email");
+    print("password = $password");
     final response = await apiService.post(endpoint: ApiEndpoints.login, data: {
       'email': email,
       'password': password,

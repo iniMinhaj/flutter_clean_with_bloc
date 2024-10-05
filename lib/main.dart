@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_clean_with_bloc/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_clean_with_bloc/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_clean_with_bloc/features/product/presentation/pages/product_page.dart';
 import 'package:get_storage/get_storage.dart';
+import 'features/product/presentation/bloc/product_bloc.dart';
 import 'injection_container.dart' as servicelocator;
 
 GetStorage storage = GetStorage();
@@ -26,9 +28,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: BlocProvider(
+      home: MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
           create: (context) => servicelocator.sl<AuthBloc>(),
-          child: const LoginPage()),
-    );
+        ),
+        BlocProvider<ProductBloc>(
+          create: (context) => servicelocator.sl<ProductBloc>(),
+        ),
+        // Add more BlocProviders here as needed
+      ],
+      child: const ProductScreen(),
+    ),);
   }
 }
