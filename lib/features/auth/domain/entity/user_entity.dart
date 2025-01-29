@@ -1,4 +1,4 @@
-class User {
+class UserEntity {
   final int? id;
   final String? name;
   final String? firstName;
@@ -15,7 +15,7 @@ class User {
   final String? createDate;
   final String? updateDate;
 
-  User({
+  UserEntity({
     this.id,
     this.name,
     this.firstName,

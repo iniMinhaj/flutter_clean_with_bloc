@@ -1,25 +1,26 @@
-import 'package:flutter_clean_with_bloc/features/auth/data/model/user_model.dart';
-
-import '../../domain/entity/user_entity.dart' as entity;
+// data/mappers/user_mapper.dart
+import '../../domain/entity/user_entity.dart';
+import '../model/user_model.dart';
 
 class UserMapper {
-  static entity.User userModelToEntity(UserModel userModel) {
-    return entity.User(
-      id: userModel.user?.id ?? 0,
-      name: userModel.user?.name ?? '',
-      firstName: userModel.user?.firstName ?? '',
-      lastName: userModel.user?.lastName ?? '',
-      phone: userModel.user?.phone ?? '',
-      email: userModel.user?.email ?? '',
-      username: userModel.user?.username ?? '',
-      balance: userModel.user?.balance ?? '0',
-      currencyBalance: userModel.user?.currencyBalance ?? '0',
-      image: userModel.user?.image ?? '',
-      roleId: userModel.user?.roleId ?? 0,
-      countryCode: userModel.user?.countryCode ?? '',
-      order: userModel.user?.order ?? 0,
-      createDate: userModel.user?.createDate ?? '',
-      updateDate: userModel.user?.updateDate ?? '',
+  // Convert UserModel to UserEntity
+  static UserEntity toEntity(UserModel model) {
+    return UserEntity(
+      id: model.user?.id,
+      name: model.user?.name,
+      firstName: model.user?.firstName,
+      lastName: model.user?.lastName,
+      phone: model.user?.phone,
+      email: model.user?.email,
+      username: model.user?.username,
+      balance: model.user?.balance,
+      currencyBalance: model.user?.currencyBalance,
+      image: model.user?.image,
+      roleId: model.user?.roleId,
+      countryCode: model.user?.countryCode,
+      order: model.user?.order,
+      createDate: model.user?.createDate,
+      updateDate: model.user?.updateDate,
     );
   }
 }

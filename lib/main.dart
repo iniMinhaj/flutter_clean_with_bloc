@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BlocProvider(
           create: (context) => servicelocator.sl<AuthBloc>(),
-          child: const LoginPage()),
+          child:  LoginScreen()),
     );
   }
 }

@@ -27,13 +27,13 @@ Future<void> init() async {
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(authRemoteDatasource: sl<AuthRemoteDatasource>()),
+    () => AuthRepositoryImpl(remoteDatasource: sl<AuthRemoteDatasource>()),
   );
 
   // Use cases
   sl.registerLazySingleton(
-      () => LoginUsecase(authRepository: sl<AuthRepository>()));
+      () => LoginUsecase(repository: sl<AuthRepository>()));
 
   // Blocs / Cubits
-  sl.registerFactory(() => AuthBloc(sl<LoginUsecase>()));
+  sl.registerFactory(() => AuthBloc(loginUsecase:  sl<LoginUsecase>()));
 }

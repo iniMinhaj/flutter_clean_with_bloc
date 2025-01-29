@@ -1,12 +1,14 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_clean_with_bloc/core/constant/api_list.dart';
-import 'package:flutter_clean_with_bloc/core/error/exception.dart';
-import 'package:flutter_clean_with_bloc/main.dart';
-
-import '../../../../core/network/api_services.dart';
+import 'package:flutter_clean_with_bloc/core/error/failures.dart';
+import 'package:flutter_clean_with_bloc/core/network/api_services.dart';
 import '../model/user_model.dart';
 
 abstract class AuthRemoteDatasource {
-  Future<UserModel> login({required String email, required String password});
+  Future<Either<Failure, UserModel>> login({
+    required String email,
+    required String password,
+  });
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
@@ -15,23 +17,50 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   AuthRemoteDatasourceImpl({required this.apiService});
 
   @override
-  Future<UserModel> login(
-      {required String email, required String password}) async {
-    print("login is started");
-    print("email = ${email}");
-    print("password = ${password}");
-    final response = await apiService.post(endpoint: ApiEndpoints.login, data: {
-      'email': email,
-      'password': password,
-    });
+  Future<Either<Failure, UserModel>> login({
+    required String email,
+    required String password,
+  }) async {
+    print("Login started");
+    print("Email: $email");
+    print("Password: $password");
 
-    print("response = ${response.data}");
+    // Call the API
+    final result = await apiService.post(
+      endpoint: ApiEndpoints.login,
+      data: {
+        'email': email,
+        'password': password,
+      },
+    );
 
-    if (response.statusCode == 201) {
-      storage.write('token', response.data['token']);
-      return UserModel.fromJson(response.data);
-    } else {
-      throw ServerException(message: response.data['message']);
-    }
+    // Handle the result using fold
+    return result.fold(
+      // If it's a Failure, return Left(Failure)
+      (failure) {
+        print("Login failed: ${failure.message}");
+        return Left(failure);
+      },
+      // If it's a Response, process the response
+      (response) {
+        print("Response status code: ${response.statusCode}");
+        print("Response data: ${response.data}");
+
+        if (response.statusCode == 201) {
+          // Parse the response into a UserModel
+          try {
+            final userModel = UserModel.fromJson(response.data);
+            return Right(userModel);
+          } catch (e) {
+            print("Failed to parse UserModel: $e");
+            return Left(ServerFailure(message: 'Failed to parse response'));
+          }
+        } else {
+          // Handle API-specific errors (e.g., 400, 401, 500)
+          final errorMessage = response.data['message'] ?? 'An unknown error occurred';
+          return Left(ServerFailure(message: errorMessage));
+        }
+      },
+    );
   }
 }

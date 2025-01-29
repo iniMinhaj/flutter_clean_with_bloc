@@ -1,33 +1,18 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// domain/usecases/login_usecase.dart
 import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-
-import 'package:flutter_clean_with_bloc/core/error/failure.dart';
-import 'package:flutter_clean_with_bloc/core/usecases/usecase.dart';
-import 'package:flutter_clean_with_bloc/features/auth/domain/repository/auth_repository.dart';
-
+import '../../../../core/error/failures.dart';
 import '../entity/user_entity.dart';
+import '../repository/auth_repository.dart';
 
-class LoginUsecase implements UseCase<User, LoginParams> {
-  final AuthRepository authRepository;
+class LoginUsecase {
+  final AuthRepository repository;
 
-  LoginUsecase({required this.authRepository});
+  LoginUsecase({required this.repository});
 
-  @override
-  Future<Either<Failure, User>> call(LoginParams params) async {
-    return await authRepository.login(
-        email: params.email, password: params.password);
+  Future<Either<Failure, UserEntity>> call({
+    required String email,
+    required String password,
+  }) async {
+    return await repository.login(email: email, password: password);
   }
-}
-
-class LoginParams extends Equatable {
-  final String email;
-  final String password;
-  const LoginParams({
-    required this.email,
-    required this.password,
-  });
-
-  @override
-  List<Object?> get props => [email, password];
 }

@@ -1,7 +1,8 @@
-import 'package:equatable/equatable.dart';
+// presentation/bloc/auth/auth_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_clean_with_bloc/features/auth/domain/entity/user_entity.dart';
-import 'package:flutter_clean_with_bloc/features/auth/domain/usecases/login.dart';
+import 'package:equatable/equatable.dart';
+import '../../domain/entity/user_entity.dart';
+import '../../domain/usecases/login.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -9,17 +10,21 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUsecase loginUsecase;
 
-  AuthBloc(this.loginUsecase) : super(AuthInitial()) {
-    on<LoginEvent>((event, emit) async {
-      emit(LoginLoading());
-      final result = await loginUsecase(
-          LoginParams(email: event.email, password: event.password));
+  AuthBloc({required this.loginUsecase}) : super(AuthInitial()) {
+    on<LoginEvent>(_onLoginEvent);
+  }
 
-      result.fold((error) {
-        return emit(LoginFailure(error.message));
-      }, (userData) {
-        return emit(LoginSuccess(userData));
-      });
-    });
+  Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading()); // Show loading state
+
+    final result = await loginUsecase.call(
+      email: event.email,
+      password: event.password,
+    );
+
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)), // Handle error
+      (user) => emit(AuthSuccess(user: user)), // Handle success
+    );
   }
 }

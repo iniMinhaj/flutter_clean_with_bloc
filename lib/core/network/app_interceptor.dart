@@ -1,86 +1,7 @@
-// import 'package:dio/dio.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_clean_with_bloc/core/constant/api_list.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:get_storage/get_storage.dart';
-
-// class ApiInterceptor extends Interceptor {
-//   final GetStorage _storage;
-
-//   ApiInterceptor(this._storage);
-
-//   @override
-//   void onRequest(
-//       RequestOptions options, RequestInterceptorHandler handler) async {
-//     if (options.extra['requiresToken'] == true) {
-//       String? token = await _getToken();
-//       if (token != null) {
-//         options.headers['Authorization'] = 'Bearer $token';
-//         options.headers['x-api-key'] = ApiEndpoints.licneseCode;
-//       }
-//     }
-//     handler.next(options); // Proceed with the request
-//   }
-
-//   @override
-//   void onResponse(Response response, ResponseInterceptorHandler handler) {
-//     handler.next(response); // Proceed with the response
-//   }
-
-//   @override
-//   void onError(DioException err, ErrorInterceptorHandler handler) {
-//     print("error = $err");
-//     // Handle no internet connection
-//     if (err.type == DioExceptionType.connectionTimeout ||
-//         err.type == DioExceptionType.unknown) {
-//       _showErrorDialog("No internet connection. Please check your network.");
-//     }
-//     // Handle API-specific error responses
-//     else if (err.type == DioExceptionType.badResponse) {
-//       int? statusCode = err.response?.statusCode;
-//       print("status code: $statusCode");
-//       switch (statusCode) {
-//         case 401:
-//           _showErrorDialog("Unauthorized. Please log in.");
-//           break;
-//         case 404:
-//           _showErrorDialog("Resource not found.");
-//           break;
-//         case 500:
-//           _showErrorDialog("Server error. Please try again later.");
-//           break;
-//         default:
-//           String? apiErrorMessage = err.response?.data['error'];
-//           _showErrorDialog(apiErrorMessage != null && apiErrorMessage.isNotEmpty
-//               ? apiErrorMessage
-//               : "An unknown error occurred.");
-//       }
-//     } else {
-//       _showErrorDialog("Something went wrong. Please try again.");
-//     }
-//     handler.next(err); // Pass through the error
-//   }
-
-//   Future<String?> _getToken() async {
-//     return _storage.read('token'); // Retrieve token from local storage
-//   }
-
-//   void _showErrorDialog(String message) {
-//     Fluttertoast.showToast(
-//         msg: message,
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.CENTER,
-//         timeInSecForIosWeb: 1,
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//         fontSize: 16.0);
-//   }
-// }
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clean_with_bloc/core/constant/api_list.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ApiInterceptor extends Interceptor {
@@ -92,7 +13,7 @@ class ApiInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     if (options.extra['requiresToken'] == true) {
-      String? token = await _getToken();
+      String? token =  _storage.read('token');
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
@@ -103,77 +24,67 @@ class ApiInterceptor extends Interceptor {
     handler.next(options); // Proceed with the request
   }
 
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
-    handler.next(response); // Proceed with the response
-  }
 
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Handle no internet connection
-    if (err.type == DioExceptionType.connectionTimeout ||
+ @override
+void onError(DioException err, ErrorInterceptorHandler handler) {
+  String errorMessage = _handleError(err);
+
+    // Create a new DioException with the error message included in the data
+    DioException newError = DioException(
+      requestOptions: err.requestOptions,
+      response: err.response, // Keep original response if available
+      type: err.type,
+      error: errorMessage, // Pass error message here
+    );
+
+    print('Error Message on Interceptor = $errorMessage');
+
+    handler.reject(newError);
+
+  // // Attach the error message to the DioException
+  // err.error = errorMessage; // Attach the error message to the DioException
+  // print('Error Message on Interceptor = $errorMessage');
+
+  // // Reject the error with the updated DioException
+  // handler.reject(err);
+}
+  
+String _handleError(DioException err) {
+  if (err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.connectionError ||
         err.type == DioExceptionType.unknown) {
-      _showErrorDialog("No internet connection. Please check your network.");
+    return "No internet connection.";
+  } else if (err.response != null) {
+    int? statusCode = err.response?.statusCode;
+
+    switch (statusCode) {
+      case 400:
+        // Parse validation errors from the response
+        final errors = err.response?.data['errors'];
+        if (errors is Map<String, dynamic>) {
+          return errors.values.join('\n'); // Join all validation messages
+        }
+        return "Invalid request. Please check your input.";
+      case 401:
+        return "Unauthorized. Please log in.";
+      case 404:
+        return "Resource not found.";
+      case 422:
+        // Parse validation errors from the response
+        final errors = err.response?.data['errors'];
+        if (errors is Map<String, dynamic>) {
+          return errors.values.join('\n'); // Join all validation messages
+        }
+        return "Validation failed. Please check your input.";
+      case 500:
+        return "Server error. Please try again later.";
+      default:
+        return "An unknown error occurred.";
     }
-    // Handle API-specific error responses
-    else if (err.type == DioExceptionType.badResponse) {
-      int? statusCode = err.response?.statusCode;
-
-      switch (statusCode) {
-        case 400:
-          _showErrorDialog(err.response?.data['errors']['validation']);
-
-          break;
-        case 401:
-          _showErrorDialog("Unauthorized. Please log in.");
-          break;
-        case 404:
-          _showErrorDialog("Resource not found.");
-          break;
-        case 422:
-          _handleValidationErrors(err.response?.data['errors']);
-          break;
-        case 500:
-          _showErrorDialog("Server error. Please try again later.");
-          break;
-        default:
-          String? apiErrorMessage = err.response?.data['error'];
-          _showErrorDialog(apiErrorMessage != null && apiErrorMessage.isNotEmpty
-              ? apiErrorMessage
-              : "An unknown error occurred.");
-      }
-    } else {
-      _showErrorDialog("Something went wrong. Please try again.");
-    }
-    return handler.next(err); // Pass through the error
+  } else {
+    return "Something went wrong.";
   }
-
-  Future<String?> _getToken() async {
-    return _storage.read('token'); // Retrieve token from local storage
-  }
-
-  void _showErrorDialog(String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-  }
-
-  // Handle 422 Validation Errors
-  void _handleValidationErrors(Map<String, dynamic>? errorData) {
-    if (errorData != null) {
-      Map<String, dynamic> errors = errorData;
-      String errorMessage = '';
-      errors.forEach((field, messages) {
-        errorMessage += '${messages.join(', ')}\n';
-      });
-      _showErrorDialog(errorMessage.trim());
-    } else {
-      _showErrorDialog("An unknown validation error occurred.");
-    }
-  }
+}
 }
