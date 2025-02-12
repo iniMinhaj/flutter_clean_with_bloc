@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_clean_with_bloc/core/constant/api_list.dart';
-import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ApiInterceptor extends Interceptor {
@@ -19,7 +17,7 @@ class ApiInterceptor extends Interceptor {
       }
     }
     options.headers['Content-Type'] = 'application/json';
-    options.headers['x-api-key'] = ApiEndpoints.licneseCode;
+    options.headers['x-api-key'] = ApiEndpoints.licenseCode;
 
     handler.next(options); // Proceed with the request
   }

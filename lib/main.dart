@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_clean_with_bloc/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_clean_with_bloc/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_clean_with_bloc/features/home/presentation/screens/home_screen.dart';
 import 'package:get_storage/get_storage.dart';
 import 'injection_container.dart' as servicelocator;
 
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BlocProvider(
           create: (context) => servicelocator.sl<AuthBloc>(),
-          child:  LoginScreen()),
+          child:  HomeScreen()),
     );
   }
 }

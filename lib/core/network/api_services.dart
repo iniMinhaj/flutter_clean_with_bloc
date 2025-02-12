@@ -17,7 +17,7 @@ class ApiService {
 
   // GET request
   Future<Either<Failure, Response>> get(
-    String endpoint, {
+    {required String endpoint, 
     bool requiresToken = false,
     Map<String, dynamic>? queryParameters,
   }) async {

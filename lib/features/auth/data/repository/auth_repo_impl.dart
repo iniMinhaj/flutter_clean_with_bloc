@@ -1,5 +1,5 @@
 // domain/repositories/auth_repository.dart
-import 'package:flutter_clean_with_bloc/features/auth/data/mapper/model_to_entity.dart';
+import 'package:flutter_clean_with_bloc/features/auth/data/mapper/user_mapper.dart';
 import '../../../../core/error/failures.dart';
 import 'package:dartz/dartz.dart';
 import '../../domain/entity/user_entity.dart';
