@@ -21,6 +21,8 @@ class HomeDataSourceImpl implements HomeDataSource{
       return Left(ServerFailure(message: failure.message));
     }, (response){
 
+      print("response = ${response.data}");
+
       if(response.statusCode == 200){
          // Parse the response into a UserModel
           try {

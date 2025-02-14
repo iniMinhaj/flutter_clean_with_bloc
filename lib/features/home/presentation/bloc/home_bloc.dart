@@ -15,9 +15,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
    final result = await   homeUsecase.call();
    result.fold((failure){
-    return Failure(message: failure.message);
+    return  Failure(message: failure.message);
    }, (popularProductEntity){
-return HomeSuccess(popularProductEntity: popularProductEntity);
+    print("PopularEntity = ${popularProductEntity.data?[0].name}");
+return emit( HomeSuccess(popularProductEntity: popularProductEntity));
    });
 
     });
