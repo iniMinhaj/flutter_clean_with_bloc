@@ -27,7 +27,6 @@ class ApiInterceptor extends Interceptor {
 void onError(DioException err, ErrorInterceptorHandler handler) {
   String errorMessage = _handleError(err);
 
-    // Create a new DioException with the error message included in the data
     DioException newError = DioException(
       requestOptions: err.requestOptions,
       response: err.response, // Keep original response if available
@@ -39,12 +38,7 @@ void onError(DioException err, ErrorInterceptorHandler handler) {
 
     handler.reject(newError);
 
-  // // Attach the error message to the DioException
-  // err.error = errorMessage; // Attach the error message to the DioException
-  // print('Error Message on Interceptor = $errorMessage');
-
-  // // Reject the error with the updated DioException
-  // handler.reject(err);
+ 
 }
   
 String _handleError(DioException err) {

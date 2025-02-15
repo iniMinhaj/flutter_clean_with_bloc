@@ -1,4 +1,5 @@
 // domain/repositories/auth_repository.dart
+import 'package:flutter_clean_with_bloc/core/error/exception.dart';
 import 'package:flutter_clean_with_bloc/features/auth/data/mapper/user_mapper.dart';
 import '../../../../core/error/failures.dart';
 import 'package:dartz/dartz.dart';
@@ -16,21 +17,18 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    final result = await remoteDatasource.login(
-      email: email,
-      password: password,
-    );
+    try {
+      final userModel = await remoteDatasource.login(
+        email: email,
+        password: password,
+      );
 
-    return result.fold(
-      (failure) {
-return Left(Failure(message: failure.message));
-
-      }, // Propagate the failure
-      (userModel) {
-        // Convert UserModel to UserEntity using the mapper
-        final userEntity = UserMapper.toEntity(userModel);
-        return Right(userEntity);
-      },
-    );
+      final userEntity = UserMapper.toEntity(userModel);
+      return Right(userEntity);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
   }
 }

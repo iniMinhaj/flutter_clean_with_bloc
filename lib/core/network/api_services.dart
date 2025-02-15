@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_clean_with_bloc/core/error/exception.dart';
 import 'package:get_storage/get_storage.dart';
 import '../error/failures.dart'; // Define your Failure class
 import 'app_interceptor.dart';
@@ -16,7 +17,7 @@ class ApiService {
   }
 
   // GET request
-  Future<Either<Failure, Response>> get(
+  Future<Response> get(
     {required String endpoint, 
     bool requiresToken = false,
     Map<String, dynamic>? queryParameters,
@@ -27,16 +28,16 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'An error occurred'));
+      throw ServerException(message: e.message ?? 'An error occurred');
     } catch (e) {
-      return Left(ServerFailure(message: 'An unknown error occurred'));
+      throw ServerException(message: e.toString());
     }
   }
 
   // POST request
-  Future<Either<Failure, Response>> post({
+  Future< Response> post({
     required String endpoint,
     Map<String,dynamic>? data,
     bool requiresToken = false,
@@ -49,7 +50,7 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (err) {
       // Extract error message from `err.error`
       final String errorMessage =
@@ -57,12 +58,12 @@ class ApiService {
 
       print("API Service Error: $errorMessage"); // Debugging log
 
-      return Left(ServerFailure(message:  errorMessage));
+      throw ServerException(message: errorMessage);
     }
   }
 
   // PUT request
-  Future<Either<Failure, Response>> put({
+  Future<Response> put({
     required String endpoint,
     dynamic data,
     bool requiresToken = false,
@@ -75,16 +76,16 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'An error occurred'));
+      throw ServerException(message: e.message ?? 'An error occurred');
     } catch (e) {
-      return Left(ServerFailure(message: 'An unknown error occurred'));
+       throw ServerException(message: e.toString() );
     }
   }
 
   // DELETE request
-  Future<Either<Failure, Response>> delete({
+  Future< Response> delete({
     required String endpoint,
     dynamic data,
     bool requiresToken = false,
@@ -97,16 +98,16 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'An error occurred'));
+       throw ServerException(message: e.message ?? 'An error occurred');
     } catch (e) {
-      return Left(ServerFailure(message: 'An unknown error occurred'));
+      throw ServerException(message: e.toString() );
     }
   }
 
   // File Upload (Multipart request)
-  Future<Either<Failure, Response>> uploadFile({
+  Future<Response> uploadFile({
     required String endpoint,
     required FormData formData,
     bool requiresToken = false,
@@ -119,16 +120,16 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'An error occurred'));
+       throw ServerException(message: e.message ?? 'An error occurred');
     } catch (e) {
-      return Left(ServerFailure(message: 'An unknown error occurred'));
+       throw ServerException(message: e.toString());
     }
   }
 
   // File Download
-  Future<Either<Failure, Response>> downloadFile({
+  Future<Response> downloadFile({
     required String url,
     required String savePath,
     bool requiresToken = false,
@@ -141,11 +142,11 @@ class ApiService {
         options: Options(extra: {'requiresToken': requiresToken}),
         queryParameters: queryParameters,
       );
-      return Right(response);
+      return response;
     } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message ?? 'An error occurred'));
+       throw ServerException(message: e.message ?? 'An error occurred');
     } catch (e) {
-      return Left(ServerFailure(message: 'An unknown error occurred'));
+       throw ServerException(message: e.toString() );
     }
   }
 }
